@@ -252,6 +252,7 @@ export default {
     },
     toggleEditMode(event) {
       this.isEditMode = event.target.checked
+      this.showMore = false
     },
     goToUrl(data) {
       if (!this.isEditMode) {
@@ -309,11 +310,17 @@ export default {
   min-width: 12rem;
   padding-top: 4px;
   position: absolute;
-  top: 133px;
+  top: 145px;
   z-index: 20;
+  border: 1px solid darkgrey;
 }
 .dropdown-item {
   cursor: pointer;
+  border-bottom: 1px solid darkgray;
+  padding: 15px;
+}
+.dropdown-item:last-child {
+  border: none;
 }
 .hero-body{
   padding: 1rem 3rem;
