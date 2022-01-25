@@ -7,6 +7,34 @@
           <a href="popup.html#firstinstall" target="_blank">dashboard</a>
         </p>
       </div>
+      <div class="nav-bar">
+        <div class="home nav-bar-item">
+          <span>
+            Home
+          </span>
+        </div>
+        <div class="note nav-bar-item">
+          <span>
+            Notes
+          </span>
+        </div>
+        <div class="more nav-bar-item">
+          <span @click="showMore = !showMore" >
+            More
+          </span>
+          <div v-show="showMore">
+            <ul class="dropdown-menu">
+              <li class="dropdown-item" >
+                <span>Edit Mode</span>
+              </li>
+              <li class="dropdown-item">
+                <span>Create New List</span>
+              </li>
+            </ul>
+          </div>
+          
+        </div>
+      </div>
     </section>
     <div v-if="firstInstall">
       <!-- <section>
@@ -75,6 +103,7 @@ export default {
   data() {
     return {
       msg: 'Text here!',
+      showMore: false,
       childrenTest: [
         {
           className: 'test',
@@ -231,6 +260,32 @@ export default {
 </script>
 
 <style lang="sass">
+.nav-bar {
+  display: flex;
+  margin-left: 25px;
+}
+.nav-bar-item {
+  padding: 5px 20px;
+  cursor: pointer;
+}
+.nav-bar-item img {
+  height: 15px;
+  padding-top: 5px;
+}
+
+.dropdown-menu {
+  display: block;
+  background-color: white;
+  left: 170px;
+  min-width: 12rem;
+  padding-top: 4px;
+  position: absolute;
+  top: 133px;
+  z-index: 20;
+}
+.dropdown-item {
+  cursor: pointer;
+}
 .hero-body{
   padding: 1rem 3rem;
 }
