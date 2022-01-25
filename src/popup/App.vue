@@ -112,6 +112,7 @@ import {
   queryTable,
   insertOrUpdate,
   deleteRow,
+  deleteTable,
 } from './database'
 
 var lib = createDB('database')
@@ -188,7 +189,8 @@ export default {
             url: dropResult.payload.url,
             date: dropResult.payload.date,
           }
-          insertOrUpdate(lib, col.name, payload)
+          deleteTable(lib, col.name)
+          addBaseData(lib, col.name, col.mychilditems, null)
         }
       }
       console.log('Card Drop: ', columnId, ' ', dropResult)
