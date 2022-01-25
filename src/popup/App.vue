@@ -21,6 +21,10 @@
             <ul class="dropdown-menu">
               <li class="dropdown-item">
                 <span>Edit Mode</span>
+                <label class="switch">
+                  <input type="checkbox" @change="toggleEditMode">
+                  <span class="slider round"></span>
+                </label>
               </li>
               <li class="dropdown-item">
                 <span @click="showModal = !showModal">Create New List</span>
@@ -74,15 +78,18 @@
                 @drag-start="e => log('drag start', e)"
                 @drag-end="e => log('drag end', e)"
                 :get-child-payload="getCardPayload(column.id)"
-                drag-class="card-ghost"
-                drop-class="card-ghost-drop"
+                :drag-class="isEditMode?'card-ghost':''"
+                :drop-class="isEditMode?'card-ghost-drop':''"
                 :drop-placeholder="dropPlaceholderOptions"
+                :lock-axis="!isEditMode?'x,y':''"
+                
               >
                 <Draggable v-for="card in column.mychilditems" :key="card.id">
-                  <div class="ChildClassName">
+                  <div class="ChildClassName" @click="goToUrl(card)">
                     <p>
-                      <span class="column-drag-handle">&#x2630;</span
-                      >{{ card.title }}
+                      <img v-if="!isEditMode" src="../assets/icons/icon_2.svg"/>
+                      <span v-else class="column-drag-handle">&#x2630;</span
+                      >{{ card.title }} 
                     </p>
                   </div>
                 </Draggable>
@@ -113,6 +120,7 @@ export default {
       msg: 'Text here!',
       showMore: false,
       showModal: false,
+      isEditMode: false,
       childrenTest: [
         {
           className: 'test',
@@ -242,6 +250,14 @@ export default {
       this.showMore = !this.showMore
       this.showModal = !this.showModal
     },
+    toggleEditMode(event) {
+      this.isEditMode = event.target.checked
+    },
+    goToUrl(data) {
+      if (!this.isEditMode) {
+        window.open(data.url)
+      }
+    }
   },
   mounted() {
     console.log(this.childrenTest)
@@ -321,7 +337,71 @@ export default {
 }
 .ChildClassName{
   border: 1px solid rgba(0,0,0,.125);
-    padding: .75rem 1.25rem;
+  padding: .75rem 1.25rem;
+}
+.ChildClassName img {
+  height: 10px;
+  padding-right: 5px;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 45px;
+  height: 20px;
+  float: right;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 .popup {
   width: 100%;

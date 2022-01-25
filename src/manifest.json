@@ -19,7 +19,8 @@
     "16": "assets/icons/icon_16.png",
     "32": "assets/icons/icon_32.png",
     "64": "assets/icons/icon_64.png",
-    "128": "assets/icons/icon_128.png"
+    "128": "assets/icons/icon_128.png",
+    "2": "assets/icons/icon_2.svg"
   },
   "manifest_version": 2,
   "name": "kwik-portal",
