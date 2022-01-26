@@ -34,8 +34,8 @@
         </div>
       </div>
     </section>
-    <div class="modal-vue">
-      <div class="overlay" v-if="showModal" @click="handleClose"></div>
+    <div class="modal-vue" v-if="showModal">
+      <div class="overlay" @click="handleClose"></div>
 
       <div class="modal" v-if="showModal">
         <p>Create listitem A</p>
