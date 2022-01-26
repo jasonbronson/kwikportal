@@ -22,7 +22,11 @@
           @drag-start="dragStart"
           :drop-placeholder="upperDropPlaceholderOptions"
         >
-          <Draggable v-for="column in childrenTest" :key="column.id">
+          <Draggable
+            v-for="column in childrenTest"
+            :key="column.id"
+            style="width:30%"
+          >
             <div :class="column.className">
               <div class="card-column-header">
                 <span class="column-drag-handle">&#x2630;</span>
@@ -39,10 +43,10 @@
                 :drop-placeholder="dropPlaceholderOptions"
               >
                 <Draggable v-for="card in column.mychilditems" :key="card.id">
-                  <div :class="card.className" :style="card.style">
+                  <div class="ChildClassName">
                     <p>
-                      {{ card.data }}
-                      <span class="column-drag-handle">&#x2630;</span>
+                      <span class="column-drag-handle">&#x2630;</span
+                      >{{ card.title }}
                     </p>
                   </div>
                 </Draggable>
@@ -57,6 +61,15 @@
 
 <script>
 import { Container, Draggable } from 'vue-smooth-dnd'
+import {
+  addBaseData,
+  createDB,
+  queryTable,
+  insertOrUpdate,
+  deleteRow,
+} from './database'
+
+var lib = createDB('database')
 
 export default {
   data() {
@@ -65,41 +78,21 @@ export default {
       childrenTest: [
         {
           className: 'test',
-          name: 'Container#',
-          id: Math.floor(Math.random() * 999),
-          mychilditems: [
-            {
-              id: Math.floor(Math.random() * 400),
-              className: 'ChildClassName',
-              data: 'Nothing here',
-              style: '',
-            },
-            {
-              id: Math.floor(Math.random() * 400),
-              className: 'ChildClassName2',
-              data: 'Nothing here2',
-              style: '',
-            },
-          ],
+          name: 'bookmarks',
+          id: 1,
+          mychilditems: [],
         },
         {
           className: 'test',
-          name: 'Container2',
-          id: Math.floor(Math.random() * 999),
-          mychilditems: [
-            {
-              id: Math.floor(Math.random() * 400),
-              className: 'ChildClassName',
-              data: 'Item1',
-              style: '',
-            },
-            {
-              id: Math.floor(Math.random() * 400),
-              className: 'ChildClassName2',
-              data: 'Item2',
-              style: '',
-            },
-          ],
+          name: 'list1',
+          id: 2,
+          mychilditems: [],
+        },
+        {
+          className: 'test',
+          name: 'list2',
+          id: 3,
+          mychilditems: [],
         },
       ],
       firstInstall: false,
@@ -120,30 +113,45 @@ export default {
   computed: {},
   methods: {
     onColumnDrop(dropResult) {
-      // const scene = Object.assign({}, this.scene)
-      // scene.children = applyDrag(scene.children, dropResult)
-      // this.scene = scene
+      let scene = this.applyDrag(this.childrenTest, dropResult)
+      this.childrenTest = scene
       console.log('DROP RESULT:', dropResult)
     },
     onCardDrop(columnId, dropResult) {
-      // if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
-      //   const scene = Object.assign({}, this.scene)
-      //   const column = scene.children.filter(p => p.id === columnId)[0]
-      //   const columnIndex = scene.children.indexOf(column)
-      //   const newColumn = Object.assign({}, column)
-      //   newColumn.children = applyDrag(newColumn.children, dropResult)
-      //   scene.children.splice(columnIndex, 1, newColumn)
-      //   this.scene = scene
-      // }
+      if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
+        const column = this.childrenTest.filter(p => p.id === columnId)[0]
+        const columnIndex = this.childrenTest.indexOf(column)
+        const newColumn = Object.assign({}, column)
+        newColumn.mychilditems = this.applyDrag(
+          newColumn.mychilditems,
+          dropResult
+        )
+        this.childrenTest.splice(columnIndex, 1, newColumn)
+
+        if (dropResult.removedIndex !== null) {
+          const col = this.childrenTest.filter(p => p.id === columnId)[0]
+          deleteRow(lib, col.name, { id: dropResult.payload.id })
+        }
+        if (dropResult.addedIndex !== null) {
+          const col = this.childrenTest.filter(p => p.id === columnId)[0]
+          let payload = {
+            id: dropResult.payload.id,
+            title: dropResult.payload.title,
+            url: dropResult.payload.url,
+            date: dropResult.payload.date,
+          }
+          insertOrUpdate(lib, col.name, payload)
+        }
+      }
       console.log('Card Drop: ', columnId, ' ', dropResult)
     },
     getCardPayload(columnId) {
-      // return index => {
-      //   return this.scene.children.filter(p => p.id === columnId)[0].children[
-      //     index
-      //   ]
-      // }
       console.log('get card payload:', columnId)
+      return index => {
+        return this.childrenTest.filter(p => p.id === columnId)[0].mychilditems[
+          index
+        ]
+      }
     },
     dragStart() {
       console.log('drag started')
@@ -166,7 +174,12 @@ export default {
       // print leaf nodes URLs to console
       if (node.url) {
         //console.log(node.title, node.url, node.dateAdded)
-        let item = { title: node.title, url: node.url, date: node.dateAdded }
+        let item = {
+          id: node.id,
+          title: node.title,
+          url: node.url,
+          date: node.dateAdded,
+        }
         this.bookmarks.push(item)
       }
     },
@@ -201,6 +214,16 @@ export default {
         this.bookmarks.sort((a, b) => {
           return a.date < b.date ? 1 : b.date < a.date ? -1 : 0
         })
+        if (lib.isNew()) {
+          addBaseData(lib, 'bookmarks', this.bookmarks, null)
+          addBaseData(lib, 'list1', null, ['id', 'title', 'url', 'date'])
+          addBaseData(lib, 'list2', null, ['id', 'title', 'url', 'date'])
+          this.childrenTest[0].mychilditems = this.bookmarks
+        } else {
+          this.childrenTest[0].mychilditems = queryTable(lib, 'bookmarks', {})
+          this.childrenTest[1].mychilditems = queryTable(lib, 'list1', {})
+          this.childrenTest[2].mychilditems = queryTable(lib, 'list2', {})
+        }
       })
     }
   },
@@ -227,5 +250,9 @@ export default {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+.ChildClassName{
+  border: 1px solid rgba(0,0,0,.125);
+    padding: .75rem 1.25rem;
 }
 </style>
