@@ -315,6 +315,7 @@ export default {
   top: 145px;
   z-index: 20;
   border: 1px solid darkgrey;
+  z-index: 1000000000000;
 }
 .dropdown-item {
   cursor: pointer;
