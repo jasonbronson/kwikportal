@@ -5,6 +5,7 @@
         <p class="title">Kwik Portal</p>
         <p class="subtitle">
           <a href="popup.html#firstinstall" target="_blank">dashboard</a>
+          <input type="text" placeholder="Search..." />
         </p>
       </div>
       <div class="nav-bar">
@@ -69,9 +70,9 @@
               </div>
               <Container
                 group-name="col"
-                @drop="(e) => onCardDrop(column.id, e)"
-                @drag-start="(e) => log('drag start', e)"
-                @drag-end="(e) => log('drag end', e)"
+                @drop="e => onCardDrop(column.id, e)"
+                @drag-start="e => log('drag start', e)"
+                @drag-end="e => log('drag end', e)"
                 :get-child-payload="getCardPayload(column.id)"
                 drag-class="card-ghost"
                 drop-class="card-ghost-drop"
@@ -156,7 +157,7 @@ export default {
     },
     onCardDrop(columnId, dropResult) {
       if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
-        const column = this.childrenTest.filter((p) => p.id === columnId)[0]
+        const column = this.childrenTest.filter(p => p.id === columnId)[0]
         const columnIndex = this.childrenTest.indexOf(column)
         const newColumn = Object.assign({}, column)
         newColumn.mychilditems = this.applyDrag(
@@ -166,11 +167,11 @@ export default {
         this.childrenTest.splice(columnIndex, 1, newColumn)
 
         if (dropResult.removedIndex !== null) {
-          const col = this.childrenTest.filter((p) => p.id === columnId)[0]
+          const col = this.childrenTest.filter(p => p.id === columnId)[0]
           deleteRow(lib, col.name, { id: dropResult.payload.id })
         }
         if (dropResult.addedIndex !== null) {
-          const col = this.childrenTest.filter((p) => p.id === columnId)[0]
+          const col = this.childrenTest.filter(p => p.id === columnId)[0]
           let payload = {
             id: dropResult.payload.id,
             title: dropResult.payload.title,
@@ -184,9 +185,10 @@ export default {
     },
     getCardPayload(columnId) {
       console.log('get card payload:', columnId)
-      return (index) => {
-        return this.childrenTest.filter((p) => p.id === columnId)[0]
-          .mychilditems[index]
+      return index => {
+        return this.childrenTest.filter(p => p.id === columnId)[0].mychilditems[
+          index
+        ]
       }
     },
     dragStart() {
@@ -202,7 +204,7 @@ export default {
     processNode(node) {
       // recursively process child nodes
       if (node.children) {
-        node.children.forEach((child) => {
+        node.children.forEach(child => {
           this.processNode(child)
         })
       }
@@ -246,8 +248,8 @@ export default {
     if (window.location.hash == '#firstinstall') {
       this.firstInstall = true
       console.log('First install here')
-      chrome.bookmarks.getTree((itemTree) => {
-        itemTree.forEach((node) => {
+      chrome.bookmarks.getTree(itemTree => {
+        itemTree.forEach(node => {
           this.processNode(node)
         })
         //sort items
@@ -372,7 +374,7 @@ export default {
     right: 0;
     left: 0;
     bottom: 0;
-    z-index: 800
+    z-index: -1
 }
 .modal-vue .overlay {
   position: fixed;
@@ -398,5 +400,25 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
+}
+.subtitle {
+  display:flex;
+  justify-content: space-between;
+
+}
+.subtitle  input {
+  border:1px solid #fff;
+  border-radius: 4px;
+}
+::placeholder {
+  color: white;
+  opacity: 1;
+  font-size:14px;
+  padding: 10px
+}
+input[type=text] {
+  padding: 10px;
+  color:white;
+  font-size:14px;
 }
 </style>
