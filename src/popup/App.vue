@@ -22,13 +22,27 @@
                 <span>Edit Mode</span>
               </li>
               <li class="dropdown-item">
-                <span>Create New List</span>
+                <span @click="showModal = !showModal">Create New List</span>
               </li>
             </ul>
           </div>
         </div>
       </div>
     </section>
+    <div class="modal-vue">
+      <div class="overlay" v-if="showModal" @click="handleClose"></div>
+
+      <div class="modal" v-if="showModal">
+        <p>Create listitem A</p>
+        <button class="close" @click="handleClose">x</button>
+        <section class="popup" v-if="showModal">
+          <div class="btn"><a href="">Create</a></div>
+          <div class="btn">
+            <a href="" @click.prevent="handleClose">Cancel</a>
+          </div>
+        </section>
+      </div>
+    </div>
     <div v-if="firstInstall">
       <!-- <section>
         <div v-for="item in bookmarks">
@@ -97,6 +111,7 @@ export default {
     return {
       msg: 'Text here!',
       showMore: false,
+      showModal: false,
       childrenTest: [
         {
           className: 'test',
@@ -221,6 +236,10 @@ export default {
 
       return result
     },
+    handleClose() {
+      this.showMore = !this.showMore
+      this.showModal = !this.showModal
+    },
   },
   mounted() {
     console.log(this.childrenTest)
@@ -301,5 +320,83 @@ export default {
 .ChildClassName{
   border: 1px solid rgba(0,0,0,.125);
     padding: .75rem 1.25rem;
+}
+.popup {
+  width: 100%;
+  height:200px;
+
+  margin: 0 auto;
+  display:flex;
+      justify-content: space-around;
+      position: relative;
+      align-items: center;
+}
+.popup .btn {
+
+}
+.popup .btn a{
+  padding: 10px 25px;
+  background-color:#0078d7;
+  color:white;
+  border-radius:4px
+}
+#container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  visibility: hidden;
+  display: none;
+  background-color: rgba(22, 22, 22, 0.5);
+
+  &:target {
+    visibility: visible;
+    display: block;
+  }
+}
+
+.reveal-modal {
+  background: #e1e1e1;
+  margin: 0 auto;
+  width: 160px;
+  position: relative;
+  z-index: 41;
+  top: 25%;
+  padding: 30px;
+  -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+.modal-vue {
+    position: fixed;
+    top: 200px;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 800
+}
+.modal-vue .overlay {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+}
+
+.modal-vue .modal {
+  position: relative;
+  width: 300px;
+  z-index: 9999;
+  margin: 0 auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  display: block
+}
+
+.modal-vue .close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 </style>
