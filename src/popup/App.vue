@@ -22,7 +22,7 @@
               <li class="dropdown-item">
                 <span>Edit Mode</span>
                 <label class="switch">
-                  <input type="checkbox" @change="toggleEditMode">
+                  <input type="checkbox" @change="toggleEditMode" />
                   <span class="slider round"></span>
                 </label>
               </li>
@@ -78,18 +78,20 @@
                 @drag-start="e => log('drag start', e)"
                 @drag-end="e => log('drag end', e)"
                 :get-child-payload="getCardPayload(column.id)"
-                :drag-class="isEditMode?'card-ghost':''"
-                :drop-class="isEditMode?'card-ghost-drop':''"
+                :drag-class="isEditMode ? 'card-ghost' : ''"
+                :drop-class="isEditMode ? 'card-ghost-drop' : ''"
                 :drop-placeholder="dropPlaceholderOptions"
-                :lock-axis="!isEditMode?'x,y':''"
-                
+                :lock-axis="!isEditMode ? 'x,y' : ''"
               >
                 <Draggable v-for="card in column.mychilditems" :key="card.id">
                   <div class="ChildClassName" @click="goToUrl(card)">
                     <p>
-                      <img v-if="!isEditMode" src="../assets/icons/icon_2.svg"/>
+                      <img
+                        v-if="!isEditMode"
+                        src="../assets/icons/icon_2.svg"
+                      />
                       <span v-else class="column-drag-handle">&#x2630;</span
-                      >{{ card.title }} 
+                      >{{ card.title }}
                     </p>
                   </div>
                 </Draggable>
@@ -258,7 +260,7 @@ export default {
       if (!this.isEditMode) {
         window.open(data.url)
       }
-    }
+    },
   },
   mounted() {
     console.log(this.childrenTest)
@@ -358,7 +360,7 @@ export default {
   float: right;
 }
 
-.switch input { 
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -461,7 +463,7 @@ input:checked + .slider:before {
     right: 0;
     left: 0;
     bottom: 0;
-    z-index: -1
+    z-index: 10000;
 }
 .modal-vue .overlay {
   position: fixed;
@@ -480,7 +482,8 @@ input:checked + .slider:before {
   margin: 0 auto;
   padding: 20px 30px;
   background-color: #fff;
-  display: block
+  display: block;
+  border-radius:4px
 }
 
 .modal-vue .close{
