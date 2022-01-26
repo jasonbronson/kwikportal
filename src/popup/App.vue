@@ -9,22 +9,16 @@
       </div>
       <div class="nav-bar">
         <div class="home nav-bar-item">
-          <span>
-            Home
-          </span>
+          <span> Home </span>
         </div>
         <div class="note nav-bar-item">
-          <span>
-            Notes
-          </span>
+          <span> Notes </span>
         </div>
         <div class="more nav-bar-item">
-          <span @click="showMore = !showMore" >
-            More
-          </span>
+          <span @click="showMore = !showMore"> More </span>
           <div v-show="showMore">
             <ul class="dropdown-menu">
-              <li class="dropdown-item" >
+              <li class="dropdown-item">
                 <span>Edit Mode</span>
               </li>
               <li class="dropdown-item">
@@ -32,7 +26,6 @@
               </li>
             </ul>
           </div>
-          
         </div>
       </div>
     </section>
@@ -53,7 +46,7 @@
           <Draggable
             v-for="column in childrenTest"
             :key="column.id"
-            style="width:30%"
+            style="width: 30%"
           >
             <div :class="column.className">
               <div class="card-column-header">
@@ -62,9 +55,9 @@
               </div>
               <Container
                 group-name="col"
-                @drop="e => onCardDrop(column.id, e)"
-                @drag-start="e => log('drag start', e)"
-                @drag-end="e => log('drag end', e)"
+                @drop="(e) => onCardDrop(column.id, e)"
+                @drag-start="(e) => log('drag start', e)"
+                @drag-end="(e) => log('drag end', e)"
                 :get-child-payload="getCardPayload(column.id)"
                 drag-class="card-ghost"
                 drop-class="card-ghost-drop"
@@ -148,7 +141,7 @@ export default {
     },
     onCardDrop(columnId, dropResult) {
       if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
-        const column = this.childrenTest.filter(p => p.id === columnId)[0]
+        const column = this.childrenTest.filter((p) => p.id === columnId)[0]
         const columnIndex = this.childrenTest.indexOf(column)
         const newColumn = Object.assign({}, column)
         newColumn.mychilditems = this.applyDrag(
@@ -158,11 +151,11 @@ export default {
         this.childrenTest.splice(columnIndex, 1, newColumn)
 
         if (dropResult.removedIndex !== null) {
-          const col = this.childrenTest.filter(p => p.id === columnId)[0]
+          const col = this.childrenTest.filter((p) => p.id === columnId)[0]
           deleteRow(lib, col.name, { id: dropResult.payload.id })
         }
         if (dropResult.addedIndex !== null) {
-          const col = this.childrenTest.filter(p => p.id === columnId)[0]
+          const col = this.childrenTest.filter((p) => p.id === columnId)[0]
           let payload = {
             id: dropResult.payload.id,
             title: dropResult.payload.title,
@@ -176,10 +169,9 @@ export default {
     },
     getCardPayload(columnId) {
       console.log('get card payload:', columnId)
-      return index => {
-        return this.childrenTest.filter(p => p.id === columnId)[0].mychilditems[
-          index
-        ]
+      return (index) => {
+        return this.childrenTest.filter((p) => p.id === columnId)[0]
+          .mychilditems[index]
       }
     },
     dragStart() {
@@ -195,7 +187,7 @@ export default {
     processNode(node) {
       // recursively process child nodes
       if (node.children) {
-        node.children.forEach(child => {
+        node.children.forEach((child) => {
           this.processNode(child)
         })
       }
@@ -235,8 +227,8 @@ export default {
     if (window.location.hash == '#firstinstall') {
       this.firstInstall = true
       console.log('First install here')
-      chrome.bookmarks.getTree(itemTree => {
-        itemTree.forEach(node => {
+      chrome.bookmarks.getTree((itemTree) => {
+        itemTree.forEach((node) => {
           this.processNode(node)
         })
         //sort items
