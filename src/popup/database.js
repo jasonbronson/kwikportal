@@ -45,3 +45,12 @@ export const deleteTable = (lib, table) => {
     lib.dropTable(table);
     lib.commit();
 }
+
+export const getListTables = (databaseName) => {
+    let db = JSON.parse(localStorage.getItem('db_' + databaseName))
+    var listTablesName = []
+    for (const table in db.tables) {
+        listTablesName.push(table)
+    }
+    return listTablesName
+}

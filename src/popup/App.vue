@@ -27,7 +27,7 @@
                 </label>
               </li>
               <li class="dropdown-item">
-                <span @click="showModal = !showModal">Create New List</span>
+                <span @click="showModal = !showModal; showMore=false">Create New List</span>
               </li>
             </ul>
           </div>
@@ -38,13 +38,19 @@
       <div class="overlay" @click="handleClose"></div>
 
       <div class="modal" v-if="showModal">
-        <p>Create listitem A</p>
+        <p>Create New List</p>
         <button class="close" @click="handleClose">x</button>
         <section class="popup" v-if="showModal">
-          <div class="btn"><a href="">Create</a></div>
-          <div class="btn">
-            <a href="" @click.prevent="handleClose">Cancel</a>
+          <div class="inputName">
+            <input type="text" v-model="listName" placeholder="Enter name of list"/>
           </div>
+          <div class="btn-group">
+            <div class="btn"><button @click="createList">Create</button></div>
+            <div class="btn">
+              <button @click.prevent="handleClose">Cancel</button>
+            </div>
+          </div>
+          
         </section>
       </div>
     </div>
@@ -113,9 +119,12 @@ import {
   insertOrUpdate,
   deleteRow,
   deleteTable,
+  getListTables,
 } from './database'
 
-var lib = createDB('database')
+const databaseName = 'database'
+
+var lib = createDB(databaseName)
 
 export default {
   data() {
@@ -124,23 +133,12 @@ export default {
       showMore: false,
       showModal: false,
       isEditMode: false,
+      listName: '',
       childrenTest: [
         {
           className: 'test',
           name: 'bookmarks',
-          id: 1,
-          mychilditems: [],
-        },
-        {
-          className: 'test',
-          name: 'list1',
-          id: 2,
-          mychilditems: [],
-        },
-        {
-          className: 'test',
-          name: 'list2',
-          id: 3,
+          id: 'bookmarks',
           mychilditems: [],
         },
       ],
@@ -251,7 +249,7 @@ export default {
       return result
     },
     handleClose() {
-      this.showMore = !this.showMore
+      this.showMore = false
       this.showModal = !this.showModal
     },
     toggleEditMode(event) {
@@ -263,6 +261,19 @@ export default {
         window.open(data.url)
       }
     },
+    createList() {
+      this.showMore = false
+      this.showModal = false
+      var listData = {
+        className: 'test',
+        name: this.listName,
+        id: this.listName,
+        mychilditems: [],
+      }
+      this.childrenTest.push(listData)
+      console.log("childrenTest", this.childrenTest)
+      addBaseData(lib, this.listName, null, ['id', 'title', 'url', 'date'])
+    }
   },
   mounted() {
     console.log(this.childrenTest)
@@ -278,14 +289,25 @@ export default {
           return a.date < b.date ? 1 : b.date < a.date ? -1 : 0
         })
         if (lib.isNew()) {
-          addBaseData(lib, 'bookmarks', this.bookmarks, null)
-          addBaseData(lib, 'list1', null, ['id', 'title', 'url', 'date'])
-          addBaseData(lib, 'list2', null, ['id', 'title', 'url', 'date'])
-          this.childrenTest[0].mychilditems = this.bookmarks
+          this.childrenTest.forEach(child => {
+              addBaseData(lib, 'bookmarks', this.bookmarks, null)
+              child.mychilditems = this.bookmarks
+          })
         } else {
-          this.childrenTest[0].mychilditems = queryTable(lib, 'bookmarks', {})
-          this.childrenTest[1].mychilditems = queryTable(lib, 'list1', {})
-          this.childrenTest[2].mychilditems = queryTable(lib, 'list2', {})
+          let listTableName = getListTables(databaseName)
+
+          listTableName.forEach(table => {
+            if (table == 'bookmarks') {
+              this.childrenTest[0].mychilditems = queryTable(lib, 'bookmarks', {})
+            } else {
+              this.childrenTest.push({
+                className: 'test',
+                name: table,
+                id: table,
+                mychilditems: queryTable(lib, table, {},)
+              })
+            }
+          })
         }
       })
     }
@@ -418,21 +440,33 @@ input:checked + .slider:before {
 .popup {
   width: 100%;
   height:200px;
+  color: black;
 
   margin: 0 auto;
-  display:flex;
-      justify-content: space-around;
-      position: relative;
-      align-items: center;
+  justify-content: space-around;
+  position: relative;
+  align-items: center;
+  text-align: center;
+  margin-top: 20px;
 }
-.popup .btn {
-
+.popup .inputName input {
+  border: 1px solid darkgray;
+  color: black;
 }
-.popup .btn a{
+.popup .inputName input::placeholder {
+  color: darkgray;
+}
+.popup .btn-group {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.popup .btn button{
   padding: 10px 25px;
   background-color:#0078d7;
   color:white;
-  border-radius:4px
+  border-radius: 4px;
+  margin: 5px;
 }
 #container {
   width: 100%;
@@ -481,12 +515,14 @@ input:checked + .slider:before {
 .modal-vue .modal {
   position: relative;
   width: 300px;
+  height: 200px;
   z-index: 9999;
   margin: 0 auto;
   padding: 20px 30px;
   background-color: #fff;
   display: block;
-  border-radius:4px
+  border-radius: 4px;
+  text-align: center;
 }
 
 .modal-vue .close{
