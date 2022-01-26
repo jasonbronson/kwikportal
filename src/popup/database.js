@@ -40,3 +40,8 @@ export const deleteRow = (lib, table, payload) => {
     lib.deleteRows(table, payload);
     lib.commit();
 }
+
+export const deleteTable = (lib, table) => {
+    lib.dropTable(table);
+    lib.commit();
+}

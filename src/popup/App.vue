@@ -5,9 +5,49 @@
         <p class="title">Kwik Portal</p>
         <p class="subtitle">
           <a href="popup.html#firstinstall" target="_blank">dashboard</a>
+          <input type="text" placeholder="Search..." />
         </p>
       </div>
+      <div class="nav-bar">
+        <div class="home nav-bar-item">
+          <span> Home </span>
+        </div>
+        <div class="note nav-bar-item">
+          <span> Notes </span>
+        </div>
+        <div class="more nav-bar-item">
+          <span @click="showMore = !showMore"> More </span>
+          <div v-show="showMore">
+            <ul class="dropdown-menu">
+              <li class="dropdown-item">
+                <span>Edit Mode</span>
+                <label class="switch">
+                  <input type="checkbox" @change="toggleEditMode" />
+                  <span class="slider round"></span>
+                </label>
+              </li>
+              <li class="dropdown-item">
+                <span @click="showModal = !showModal">Create New List</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </section>
+    <div class="modal-vue" v-if="showModal">
+      <div class="overlay" @click="handleClose"></div>
+
+      <div class="modal" v-if="showModal">
+        <p>Create listitem A</p>
+        <button class="close" @click="handleClose">x</button>
+        <section class="popup" v-if="showModal">
+          <div class="btn"><a href="">Create</a></div>
+          <div class="btn">
+            <a href="" @click.prevent="handleClose">Cancel</a>
+          </div>
+        </section>
+      </div>
+    </div>
     <div v-if="firstInstall">
       <!-- <section>
         <div v-for="item in bookmarks">
@@ -25,7 +65,7 @@
           <Draggable
             v-for="column in childrenTest"
             :key="column.id"
-            style="width:30%"
+            style="width: 30%"
           >
             <div :class="column.className">
               <div class="card-column-header">
@@ -38,14 +78,19 @@
                 @drag-start="e => log('drag start', e)"
                 @drag-end="e => log('drag end', e)"
                 :get-child-payload="getCardPayload(column.id)"
-                drag-class="card-ghost"
-                drop-class="card-ghost-drop"
+                :drag-class="isEditMode ? 'card-ghost' : ''"
+                :drop-class="isEditMode ? 'card-ghost-drop' : ''"
                 :drop-placeholder="dropPlaceholderOptions"
+                :lock-axis="!isEditMode ? 'x,y' : ''"
               >
                 <Draggable v-for="card in column.mychilditems" :key="card.id">
-                  <div class="ChildClassName">
+                  <div class="ChildClassName" @click="goToUrl(card)">
                     <p>
-                      <span class="column-drag-handle">&#x2630;</span
+                      <img
+                        v-if="!isEditMode"
+                        src="../assets/icons/icon_2.svg"
+                      />
+                      <span v-else class="column-drag-handle">&#x2630;</span
                       >{{ card.title }}
                     </p>
                   </div>
@@ -67,6 +112,7 @@ import {
   queryTable,
   insertOrUpdate,
   deleteRow,
+  deleteTable,
 } from './database'
 
 var lib = createDB('database')
@@ -75,6 +121,9 @@ export default {
   data() {
     return {
       msg: 'Text here!',
+      showMore: false,
+      showModal: false,
+      isEditMode: false,
       childrenTest: [
         {
           className: 'test',
@@ -140,7 +189,8 @@ export default {
             url: dropResult.payload.url,
             date: dropResult.payload.date,
           }
-          insertOrUpdate(lib, col.name, payload)
+          deleteTable(lib, col.name)
+          addBaseData(lib, col.name, col.mychilditems, null)
         }
       }
       console.log('Card Drop: ', columnId, ' ', dropResult)
@@ -200,6 +250,19 @@ export default {
 
       return result
     },
+    handleClose() {
+      this.showMore = !this.showMore
+      this.showModal = !this.showModal
+    },
+    toggleEditMode(event) {
+      this.isEditMode = event.target.checked
+      this.showMore = false
+    },
+    goToUrl(data) {
+      if (!this.isEditMode) {
+        window.open(data.url)
+      }
+    },
   },
   mounted() {
     console.log(this.childrenTest)
@@ -231,6 +294,39 @@ export default {
 </script>
 
 <style lang="sass">
+.nav-bar {
+  display: flex;
+  margin-left: 25px;
+}
+.nav-bar-item {
+  padding: 5px 20px;
+  cursor: pointer;
+}
+.nav-bar-item img {
+  height: 15px;
+  padding-top: 5px;
+}
+
+.dropdown-menu {
+  display: block;
+  background-color: white;
+  left: 170px;
+  min-width: 12rem;
+  padding-top: 4px;
+  position: absolute;
+  top: 145px;
+  z-index: 20;
+  border: 1px solid darkgrey;
+  z-index: 1000000000000;
+}
+.dropdown-item {
+  cursor: pointer;
+  border-bottom: 1px solid darkgray;
+  padding: 15px;
+}
+.dropdown-item:last-child {
+  border: none;
+}
 .hero-body{
   padding: 1rem 3rem;
 }
@@ -253,6 +349,169 @@ export default {
 }
 .ChildClassName{
   border: 1px solid rgba(0,0,0,.125);
-    padding: .75rem 1.25rem;
+  padding: .75rem 1.25rem;
+}
+.ChildClassName img {
+  height: 10px;
+  padding-right: 5px;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 45px;
+  height: 20px;
+  float: right;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 3px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+.popup {
+  width: 100%;
+  height:200px;
+
+  margin: 0 auto;
+  display:flex;
+      justify-content: space-around;
+      position: relative;
+      align-items: center;
+}
+.popup .btn {
+
+}
+.popup .btn a{
+  padding: 10px 25px;
+  background-color:#0078d7;
+  color:white;
+  border-radius:4px
+}
+#container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  visibility: hidden;
+  display: none;
+  background-color: rgba(22, 22, 22, 0.5);
+
+  &:target {
+    visibility: visible;
+    display: block;
+  }
+}
+
+.reveal-modal {
+  background: #e1e1e1;
+  margin: 0 auto;
+  width: 160px;
+  position: relative;
+  z-index: 41;
+  top: 25%;
+  padding: 30px;
+  -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+.modal-vue {
+    position: fixed;
+    top: 200px;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 10000;
+}
+.modal-vue .overlay {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, .5);
+}
+
+.modal-vue .modal {
+  position: relative;
+  width: 300px;
+  z-index: 9999;
+  margin: 0 auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  display: block;
+  border-radius:4px
+}
+
+.modal-vue .close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.subtitle {
+  display:flex;
+  justify-content: space-between;
+
+}
+.subtitle  input {
+  border:1px solid #fff;
+  border-radius: 4px;
+}
+::placeholder {
+  color: white;
+  opacity: 1;
+  font-size:14px;
+  padding: 10px
+}
+input[type=text] {
+  padding: 10px;
+  color:white;
+  font-size:14px;
 }
 </style>
