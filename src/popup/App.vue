@@ -5,7 +5,7 @@
         <p class="title">Kwik Portal</p>
         <p class="subtitle">
           <a href="popup.html#firstinstall" target="_blank">dashboard</a>
-          <input type="text" placeholder="Search..." />
+          <input type="text" placeholder="Search..." v-model="stringSearch" @keyup.enter="searchQuery"/>
         </p>
       </div>
       <div class="nav-bar">
@@ -133,6 +133,7 @@ export default {
       showMore: false,
       showModal: false,
       isEditMode: false,
+      stringSearch: '',
       listName: '',
       childrenTest: [
         {
@@ -157,7 +158,13 @@ export default {
     }
   },
   components: { Container, Draggable },
-  computed: {},
+  watch: {
+    bookmarks(newValue,oldValue){
+      console.log('newValue',newValue);
+      console.log('oldValue',oldValue);
+    }
+  },
+
   methods: {
     onColumnDrop(dropResult) {
       let scene = this.applyDrag(this.childrenTest, dropResult)
@@ -273,10 +280,20 @@ export default {
       this.childrenTest.push(listData)
       console.log("childrenTest", this.childrenTest)
       addBaseData(lib, this.listName, null, ['id', 'title', 'url', 'date'])
+    },
+
+     searchQuery(){
+      if(this.stringSearch){
+      this.stringSearch = ''
+       let newBookmarks = this.bookmarks.filter(item => item.title.includes(this.stringSearch.toString()))
+       return newBookmarks
+       
+      }else{
+        return this.bookmarks;
+      }
     }
   },
   mounted() {
-    console.log(this.childrenTest)
     if (window.location.hash == '#firstinstall') {
       this.firstInstall = true
       console.log('First install here')
